@@ -16,16 +16,35 @@ public class TallaService {
         this.tallaRepository = tallaRepository;
     }
 
-    public List<Talla> obtenerTallasPorTienda(Long tiendaId) {
-        return tallaRepository.findByTiendaId(tiendaId);
+    public List<Talla> obtenerTodas() {
+        return tallaRepository.findAll();
     }
 
-    public Optional<Talla> obtenerTallaPorId(Long id) {
+    public Optional<Talla> obtenerPorId(Long id) {
         return tallaRepository.findById(id);
+    }
+
+    public List<Talla> obtenerPorTienda(Long tiendaId) {
+        return tallaRepository.findByTiendaId(tiendaId);
     }
 
     public Talla agregarTalla(Talla talla) {
         return tallaRepository.save(talla);
+    }
+
+    public Optional<Talla> actualizarTalla(Long id, Talla tallaActualizada) {
+        Optional<Talla> tallaOptional = tallaRepository.findById(id);
+        if (tallaOptional.isPresent()) {
+            Talla talla = tallaOptional.get();
+            talla.setNombre(tallaActualizada.getNombre());
+            talla.setAltura(tallaActualizada.getAltura());
+            talla.setPecho(tallaActualizada.getPecho());
+            talla.setCintura(tallaActualizada.getCintura());
+            talla.setCadera(tallaActualizada.getCadera());
+            talla.setEntrepierna(tallaActualizada.getEntrepierna());
+            return Optional.of(tallaRepository.save(talla));
+        }
+        return Optional.empty();
     }
 
     public boolean eliminarTalla(Long id) {

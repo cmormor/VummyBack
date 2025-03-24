@@ -24,6 +24,9 @@ public class Pedido {
 
     private LocalDateTime fecha = LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
+    private EstadoPedido estado = EstadoPedido.CONFIRMADO;
+
     private Double total;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)

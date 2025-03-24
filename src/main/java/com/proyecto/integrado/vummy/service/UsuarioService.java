@@ -1,5 +1,6 @@
 package com.proyecto.integrado.vummy.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -17,23 +18,56 @@ public class UsuarioService {
     this.usuarioRepository = usuarioRepository;
   }
 
-  public Optional<Usuario> buscarPorEmail (String email){
+  public List<Usuario> obtenerTodos() {
+    return usuarioRepository.findAll();
+  }
+
+  public Optional<Usuario> obtenerPorId(Long id) {
+    return usuarioRepository.findById(id);
+  }
+
+  public Optional<Usuario> obtenerPorEmail (String email){
     return usuarioRepository.findByEmail(email);
   }
 
   public Usuario registrarUsuario(Usuario usuario) {
-        usuario.setRol(Rol.REGISTRADO);
-        return usuarioRepository.save(usuario);
+      usuario.setRol(Rol.REGISTRADO);
+      return usuarioRepository.save(usuario);
+  }
+
+  public Usuario iniciarSesion(String email, String password) {
+    Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
+    if (usuarioOptional.isPresent()) {
+      Usuario usuario = usuarioOptional.get();
+      if (usuario.getPassword().equals(password)) {
+        return usuario;
+      }
     }
+    return null;
+  }  
 
   public Usuario actualizarRol(Long usuarioId, Rol nuevoRol) {
-    Optional<Usuario> usuarOptional = usuarioRepository.findById(usuarioId);
-    if (usuarOptional.isPresent()) {
-      Usuario usuario = usuarOptional.get();
+    Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
+    if (usuarioOptional.isPresent()) {
+      Usuario usuario = usuarioOptional.get();
       usuario.setRol(nuevoRol);
       return usuarioRepository.save(usuario);
     }
     return null;
+  }
+
+  public Optional<Usuario> actualizarUsuario(Long id, Usuario usuarioActualizado) {
+    Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+    if (usuarioOptional.isPresent()) {
+      Usuario usuario = usuarioOptional.get();
+      
+      usuario.setNombre(usuarioActualizado.getNombre());
+      usuario.setEmail(usuarioActualizado.getEmail());
+      usuario.setPassword(usuarioActualizado.getPassword());
+
+      return Optional.of(usuarioRepository.save(usuario));
+    }
+    return Optional.empty();
   }
 
   public boolean eliminarUsuario(Long id) {
@@ -42,6 +76,5 @@ public class UsuarioService {
         return true;
     }
     return false;
-}
-
+  }
 }

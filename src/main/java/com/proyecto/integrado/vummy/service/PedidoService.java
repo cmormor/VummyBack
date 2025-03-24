@@ -1,7 +1,10 @@
 package com.proyecto.integrado.vummy.service;
 
 import com.proyecto.integrado.vummy.entity.Pedido;
+import com.proyecto.integrado.vummy.entity.EstadoPedido;
+import com.proyecto.integrado.vummy.entity.PedidoPrenda;
 import com.proyecto.integrado.vummy.repository.PedidoRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +19,10 @@ public class PedidoService {
         this.pedidoRepository = pedidoRepository;
     }
 
+    public List<Pedido> obtenerTodos() {
+        return pedidoRepository.findAll();
+    }
+
     public List<Pedido> obtenerPedidosPorUsuario(Long usuarioId) {
         return pedidoRepository.findByUsuarioId(usuarioId);
     }
@@ -25,7 +32,20 @@ public class PedidoService {
     }
 
     public Pedido agregarPedido(Pedido pedido) {
+        pedido.setFecha(java.time.LocalDateTime.now());
+        pedido.setEstado(EstadoPedido.CONFIRMADO);
+        pedido.setTotal(calcularTotal(pedido.getPrendas()));
         return pedidoRepository.save(pedido);
+    }
+
+    public Optional<Pedido> actualizarEstado(Long id, EstadoPedido nuevoEstado) {
+        Optional<Pedido> pedidoOptional = pedidoRepository.findById(id);
+        if (pedidoOptional.isPresent()) {
+            Pedido pedido = pedidoOptional.get();
+            pedido.setEstado(nuevoEstado);
+            return Optional.of(pedidoRepository.save(pedido));
+        }
+        return Optional.empty();
     }
 
     public boolean eliminarPedido(Long id) {
@@ -34,5 +54,24 @@ public class PedidoService {
             return true;
         }
         return false;
+    }
+
+    private Double calcularTotal(List<PedidoPrenda> prendas) {
+        return prendas.stream()
+                .mapToDouble(pp -> pp.getPrenda().getPrecio() * pp.getCantidad())
+                .sum();
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void actualizarEstadosAutomáticamente() {
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        for (Pedido pedido : pedidos) {
+            if (pedido.getEstado() == EstadoPedido.CONFIRMADO) {
+                pedido.setEstado(EstadoPedido.ENVIADO);
+            } else if (pedido.getEstado() == EstadoPedido.ENVIADO) {
+                pedido.setEstado(EstadoPedido.ENTREGADO);
+            }
+            pedidoRepository.save(pedido);
+        }
     }
 }
