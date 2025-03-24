@@ -1,11 +1,12 @@
 package com.proyecto.integrado.vummy.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -23,10 +24,10 @@ public class Usuario {
     @Column(nullable = false)
     private String nombre;
 
-    private double altura;
-    private double cuelloManga;
-    private double pecho;
-    private double cintura;
-    private double cadera;
-    private double entrepierna;
+    @Enumerated(EnumType.STRING)
+    private Rol rol;
+
+    @OneToOne
+    @JoinColumn(name = "medidas_id", unique = true)
+    private Medidas medidas;
 }
