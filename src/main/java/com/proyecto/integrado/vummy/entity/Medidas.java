@@ -21,4 +21,7 @@ public class Medidas {
     private Double cintura;
     private Double cadera;
     private Double entrepierna;
+
+    @OneToOne(mappedBy = "medidas")
+    private Usuario usuario;
 }
