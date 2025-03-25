@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sizes")
+@RequestMapping("/api/v1/sizes")
 public class TallaController {
 
     private final TallaService tallaService;

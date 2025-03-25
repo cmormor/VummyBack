@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/measurements")
+@RequestMapping("/api/v1/measurements")
 public class MedidasController {
 
     private final MedidasService medidasService;
