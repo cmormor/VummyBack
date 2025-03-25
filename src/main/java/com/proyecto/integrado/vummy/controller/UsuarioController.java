@@ -4,6 +4,7 @@ import com.proyecto.integrado.vummy.dto.UsuarioDTO;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
 import com.proyecto.integrado.vummy.service.UsuarioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,27 +28,32 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> obtenerPorId(@PathVariable Long id) {
         return usuarioService.obtenerPorId(id)
+                .filter(usuario -> usuario.getRol() != Rol.VISITANTE)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @GetMapping("/email")
     public ResponseEntity<UsuarioDTO> obtenerPorEmail(@RequestParam String email) {
         return usuarioService.obtenerPorEmail(email)
+                .filter(usuario -> usuario.getRol() != Rol.VISITANTE)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @PostMapping
     public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuarioService.registrarUsuario(usuario));
+        if (usuario.getRol() == null) {
+            usuario.setRol(Rol.VISITANTE);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.registrarUsuario(usuario));
     }
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioDTO> iniciarSesion(@RequestParam String email, @RequestParam String password) {
         return usuarioService.iniciarSesion(email, password)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(401).build());
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @PutMapping("/{id}")
@@ -58,10 +64,15 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}/role")
-    public ResponseEntity<UsuarioDTO> actualizarRol(@PathVariable Long id, @RequestParam Rol rol) {
-        return usuarioService.actualizarRol(id, rol)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UsuarioDTO> actualizarRol(@PathVariable Long id, @RequestParam String rol) {
+        try {
+            Rol nuevoRol = Rol.valueOf(rol.toUpperCase());
+            return usuarioService.actualizarRol(id, nuevoRol)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @DeleteMapping("/{id}")

@@ -16,7 +16,7 @@ public class UsuarioService {
   
   private final UsuarioRepository usuarioRepository;
 
-  public UsuarioService(UsuarioRepository usuarioRepository){
+  public UsuarioService(UsuarioRepository usuarioRepository) {
     this.usuarioRepository = usuarioRepository;
   }
 
@@ -41,15 +41,19 @@ public class UsuarioService {
   }
 
   public UsuarioDTO registrarUsuario(Usuario usuario) {
-      usuario.setRol(Rol.REGISTRADO);
-      Usuario nuevoUsuario = usuarioRepository.save(usuario);
-      return convertirAUsuarioDTO(nuevoUsuario);
+    usuario.setRol(Rol.REGISTRADO);
+    Usuario nuevoUsuario = usuarioRepository.save(usuario);
+    return convertirAUsuarioDTO(nuevoUsuario);
   }
 
   public Optional<UsuarioDTO> iniciarSesion(String email, String password) {
     return usuarioRepository.findByEmail(email)
             .filter(usuario -> usuario.getPassword().equals(password))
-            .map(this::convertirAUsuarioDTO);
+            .map(usuario -> {
+                usuario.setRol(Rol.REGISTRADO);
+                usuarioRepository.save(usuario);
+                return convertirAUsuarioDTO(usuario);
+            });
   }
 
   public Optional<UsuarioDTO> actualizarRol(Long usuarioId, Rol nuevoRol) {
