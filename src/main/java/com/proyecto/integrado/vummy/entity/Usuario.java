@@ -27,7 +27,11 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
-    @OneToOne
-    @JoinColumn(name = "medidas_id", unique = true)
-    private Medidas medidas;
+    private Double altura;
+    private Double cuelloManga;
+    private Double pecho;
+    private Double cintura;
+    private Double cadera;
+    private Double entrepierna;
+
 }

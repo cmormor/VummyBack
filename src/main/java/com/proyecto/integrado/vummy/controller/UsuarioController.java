@@ -44,10 +44,8 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
-        if (usuario.getRol() == null) {
-            usuario.setRol(Rol.VISITANTE);
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.registrarUsuario(usuario));
+        UsuarioDTO usuarioDTO = usuarioService.registrarUsuario(usuario);
+        return ResponseEntity.ok(usuarioDTO);
     }
 
     @PostMapping("/login")

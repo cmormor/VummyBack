@@ -13,7 +13,7 @@ import com.proyecto.integrado.vummy.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
-  
+
   private final UsuarioRepository usuarioRepository;
 
   public UsuarioService(UsuarioRepository usuarioRepository) {
@@ -21,7 +21,9 @@ public class UsuarioService {
   }
 
   public UsuarioDTO convertirAUsuarioDTO(Usuario usuario) {
-    return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol());
+    return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol(), 
+                           usuario.getAltura(), usuario.getCuelloManga(), usuario.getPecho(),
+                           usuario.getCintura(), usuario.getCadera(), usuario.getEntrepierna());
   }
 
   public List<UsuarioDTO> obtenerTodos() {
@@ -41,10 +43,19 @@ public class UsuarioService {
   }
 
   public UsuarioDTO registrarUsuario(Usuario usuario) {
+    boolean existeUsuario = usuarioRepository.findByEmail(usuario.getEmail()).isPresent()
+                         || usuarioRepository.findByNombre(usuario.getNombre()).isPresent();
+
+    if (existeUsuario) {
+        throw new IllegalArgumentException("El nombre o correo electrónico ya están en uso.");
+    }
+
+    validarMedidas(usuario);
     usuario.setRol(Rol.REGISTRADO);
     Usuario nuevoUsuario = usuarioRepository.save(usuario);
     return convertirAUsuarioDTO(nuevoUsuario);
-  }
+}
+
 
   public Optional<UsuarioDTO> iniciarSesion(String email, String password) {
     return usuarioRepository.findByEmail(email)
@@ -71,6 +82,13 @@ public class UsuarioService {
                 usuario.setNombre(usuarioActualizado.getNombre());
                 usuario.setEmail(usuarioActualizado.getEmail());
                 usuario.setPassword(usuarioActualizado.getPassword());
+                usuario.setAltura(usuarioActualizado.getAltura());
+                usuario.setCuelloManga(usuarioActualizado.getCuelloManga());
+                usuario.setPecho(usuarioActualizado.getPecho());
+                usuario.setCintura(usuarioActualizado.getCintura());
+                usuario.setCadera(usuarioActualizado.getCadera());
+                usuario.setEntrepierna(usuarioActualizado.getEntrepierna());
+                validarMedidas(usuario);
                 return usuarioRepository.save(usuario);
             })
             .map(this::convertirAUsuarioDTO);
@@ -82,5 +100,26 @@ public class UsuarioService {
         return true;
     }
     return false;
+  }
+
+  private void validarMedidas(Usuario usuario) {
+    if (usuario.getAltura() != null && usuario.getAltura() < 100) {
+      throw new IllegalArgumentException("La altura debe ser al menos 100 cm");
+    }
+    if (usuario.getCuelloManga() != null && usuario.getCuelloManga() < 25) {
+      throw new IllegalArgumentException("El cuello/manga debe ser al menos 25 cm");
+    }
+    if (usuario.getPecho() != null && usuario.getPecho() < 60) {
+      throw new IllegalArgumentException("El pecho debe ser al menos 60 cm");
+    }
+    if (usuario.getCintura() != null && usuario.getCintura() < 50) {
+      throw new IllegalArgumentException("La cintura debe ser al menos 50 cm");
+    }
+    if (usuario.getCadera() != null && usuario.getCadera() < 50) {
+      throw new IllegalArgumentException("La cadera debe ser al menos 50 cm");
+    }
+    if (usuario.getEntrepierna() != null && usuario.getEntrepierna() < 50) {
+      throw new IllegalArgumentException("La entrepierna debe ser al menos 50 cm");
+    }
   }
 }
