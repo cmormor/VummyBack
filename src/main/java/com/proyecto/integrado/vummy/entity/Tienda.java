@@ -1,5 +1,6 @@
 package com.proyecto.integrado.vummy.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +24,10 @@ public class Tienda {
     private String descripcion;
 
     @OneToMany(mappedBy = "tienda", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Prenda> prendas;
 
     @OneToMany(mappedBy = "tienda", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Talla> tallas;
 }

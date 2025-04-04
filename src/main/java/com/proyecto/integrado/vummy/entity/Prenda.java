@@ -1,5 +1,7 @@
 package com.proyecto.integrado.vummy.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,10 +22,12 @@ public class Prenda {
 
     @ManyToOne
     @JoinColumn(name = "talla_id", nullable = false)
+    @JsonBackReference
     private Talla talla;
 
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)
+    @JsonBackReference
     private Tienda tienda;
 
     private Double precio;

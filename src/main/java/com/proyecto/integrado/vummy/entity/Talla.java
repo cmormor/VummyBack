@@ -1,5 +1,8 @@
 package com.proyecto.integrado.vummy.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "tallas")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Talla {
 
     @Id
@@ -28,5 +32,32 @@ public class Talla {
 
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)
+    @JsonBackReference
     private Tienda tienda;
+
+    @JsonProperty("tienda")
+    public TiendaInfo getTiendaInfo() {
+        if (tienda != null) {
+            return new TiendaInfo(tienda.getId(), tienda.getNombre());
+        }
+        return null;
+    }
+
+    public static class TiendaInfo {
+        private Long id;
+        private String nombre;
+
+        public TiendaInfo(Long id, String nombre) {
+            this.id = id;
+            this.nombre = nombre;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+    }
 }

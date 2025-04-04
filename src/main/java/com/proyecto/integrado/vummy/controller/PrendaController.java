@@ -1,12 +1,16 @@
 package com.proyecto.integrado.vummy.controller;
 
+import com.proyecto.integrado.vummy.dto.PrendaDTO;
 import com.proyecto.integrado.vummy.entity.Prenda;
+import com.proyecto.integrado.vummy.entity.Talla;
+import com.proyecto.integrado.vummy.entity.Tienda;
 import com.proyecto.integrado.vummy.service.PrendaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = {"http://127.0.0.1:5173", "https://www.vummyapp.com"})
 @RestController
 @RequestMapping("/api/v1/clothes")
 public class PrendaController {
@@ -18,30 +22,68 @@ public class PrendaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Prenda>> obtenerTodas() {
+    public ResponseEntity<List<PrendaDTO>> obtenerTodas() {
         return ResponseEntity.ok(prendaService.obtenerTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Prenda> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<PrendaDTO> obtenerPorId(@PathVariable Long id) {
         return prendaService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/store/{tiendaId}")
-    public ResponseEntity<List<Prenda>> obtenerPorTienda(@PathVariable Long tiendaId) {
+    public ResponseEntity<List<PrendaDTO>> obtenerPorTienda(@PathVariable Long tiendaId) {
         return ResponseEntity.ok(prendaService.obtenerPorTienda(tiendaId));
     }
 
     @PostMapping
-    public ResponseEntity<Prenda> agregarPrenda(@RequestBody Prenda prenda) {
-        return ResponseEntity.ok(prendaService.guardarPrenda(prenda));
+    public ResponseEntity<PrendaDTO> agregarPrenda(@RequestBody PrendaDTO prendaDTO) {
+        Prenda prenda = new Prenda();
+        prenda.setNombre(prendaDTO.getNombre());
+        prenda.setPrecio(prendaDTO.getPrecio());
+
+        if (prendaDTO.getTiendaId() != null) {
+            Tienda tienda = prendaService.obtenerTiendaPorId(prendaDTO.getTiendaId())
+                    .orElseThrow(() -> new RuntimeException("Tienda no encontrada"));
+            prenda.setTienda(tienda);
+        }
+
+        if (prendaDTO.getTallaId() != null) {
+            Talla talla = prendaService.obtenerTallaPorId(prendaDTO.getTallaId())
+                    .orElseThrow(() -> new RuntimeException("Talla no encontrada"));
+            prenda.setTalla(talla);
+        }
+
+        PrendaDTO prendaGuardadaDTO = prendaService.guardarPrenda(prenda);
+        return ResponseEntity.status(201).body(prendaGuardadaDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Prenda> actualizarPrenda(@PathVariable Long id, @RequestBody Prenda prenda) {
-        return prendaService.actualizarPrenda(id, prenda)
+    public ResponseEntity<PrendaDTO> actualizarPrenda(@PathVariable Long id, @RequestBody PrendaDTO prendaDTO) {
+        Prenda prendaActualizada = new Prenda();
+        prendaActualizada.setId(id);
+        prendaActualizada.setNombre(prendaDTO.getNombre());
+        prendaActualizada.setPrecio(prendaDTO.getPrecio());
+
+        if (prendaDTO.getTiendaId() != null) {
+            Tienda tienda = new Tienda();
+            tienda.setId(prendaDTO.getTiendaId());
+            prendaActualizada.setTienda(tienda);
+        } else {
+            prendaActualizada.setTienda(null);
+        }
+
+        if (prendaDTO.getTallaId() != null) {
+            Talla talla = new Talla();
+            talla.setId(prendaDTO.getTallaId());
+            prendaActualizada.setTalla(talla);
+        } else {
+            prendaActualizada.setTalla(null);
+        }
+
+        return prendaService.actualizarPrenda(id, prendaActualizada)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

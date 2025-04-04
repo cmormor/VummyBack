@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface PrendaRepository extends JpaRepository<Prenda, Long> {
-    List<Prenda> findByTiendaId(Long tiendaId); // Obtener todas las prendas de una tienda
+    List<Prenda> findByTiendaId(Long tiendaId);
 }

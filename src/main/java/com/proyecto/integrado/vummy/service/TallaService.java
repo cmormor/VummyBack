@@ -2,10 +2,12 @@ package com.proyecto.integrado.vummy.service;
 
 import com.proyecto.integrado.vummy.entity.Talla;
 import com.proyecto.integrado.vummy.repository.TallaRepository;
+import com.proyecto.integrado.vummy.dto.TallaDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TallaService {
@@ -16,16 +18,21 @@ public class TallaService {
         this.tallaRepository = tallaRepository;
     }
 
-    public List<Talla> obtenerTodas() {
-        return tallaRepository.findAll();
+    public List<TallaDTO> obtenerTodas() {
+        return tallaRepository.findAll().stream()
+                .map(TallaDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Talla> obtenerPorId(Long id) {
-        return tallaRepository.findById(id);
+    public Optional<TallaDTO> obtenerPorId(Long id) {
+        return tallaRepository.findById(id)
+                .map(TallaDTO::new);
     }
 
-    public List<Talla> obtenerPorTienda(Long tiendaId) {
-        return tallaRepository.findByTiendaId(tiendaId);
+    public List<TallaDTO> obtenerPorTienda(Long tiendaId) {
+        return tallaRepository.findByTiendaId(tiendaId).stream()
+                .map(TallaDTO::new)
+                .collect(Collectors.toList());
     }
 
     public Talla agregarTalla(Talla talla) {
