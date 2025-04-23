@@ -18,4 +18,9 @@ public class UsuarioDTO {
     private Double cintura;
     private Double cadera;
     private Double entrepierna;
+    private String token;
+
+    public void setToken(String token) {
+      this.token = token;
+  }
 }

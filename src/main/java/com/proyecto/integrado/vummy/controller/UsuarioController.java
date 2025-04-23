@@ -1,24 +1,35 @@
 package com.proyecto.integrado.vummy.controller;
 
+import com.proyecto.integrado.vummy.dto.LoginRequestDTO;
 import com.proyecto.integrado.vummy.dto.UsuarioDTO;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
+import com.proyecto.integrado.vummy.security.jwt.JwtService;
+import com.proyecto.integrado.vummy.security.jwt.TokenBlacklistService;
 import com.proyecto.integrado.vummy.service.UsuarioService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = {"http://127.0.0.1:5173", "https://www.vummyapp.com"})
 @RestController
 @RequestMapping("/api/v1/users")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService,
+                             JwtService jwtService,
+                             TokenBlacklistService tokenBlacklistService) {
         this.usuarioService = usuarioService;
+        this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @GetMapping
@@ -42,17 +53,30 @@ public class UsuarioController {
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
-    @PostMapping
+    @PostMapping("/auth/register")
     public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
         UsuarioDTO usuarioDTO = usuarioService.registrarUsuario(usuario);
         return ResponseEntity.ok(usuarioDTO);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UsuarioDTO> iniciarSesion(@RequestParam String email, @RequestParam String password) {
-        return usuarioService.iniciarSesion(email, password)
-                .map(ResponseEntity::ok)
+    @PostMapping("/auth/login")
+    public ResponseEntity<UsuarioDTO> iniciarSesion(@RequestBody LoginRequestDTO loginRequest) {
+        return usuarioService.iniciarSesion(loginRequest.getEmail(), loginRequest.getPassword())
+                .map(usuario -> ResponseEntity.ok(usuario))
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            long expirationTime = jwtService.extractExpiration(token).getTime();
+            tokenBlacklistService.addTokenToBlacklist(token, expirationTime);
+        }
+
+        return ResponseEntity.ok("Sesión cerrada exitosamente");
     }
 
     @PutMapping("/{id}")

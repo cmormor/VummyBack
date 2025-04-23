@@ -6,6 +6,7 @@ import com.proyecto.integrado.vummy.dto.TallaDTO;
 import com.proyecto.integrado.vummy.entity.Tienda;
 import com.proyecto.integrado.vummy.repository.TiendaRepository;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -121,9 +122,25 @@ public class TiendaService {
         return Optional.empty();
     }
 
+    @Transactional
     public boolean eliminarTienda(Long id) {
-        if (tiendaRepository.existsById(id)) {
-            tiendaRepository.deleteById(id);
+        Optional<Tienda> tiendaOptional = tiendaRepository.findById(id);
+        if (tiendaOptional.isPresent()) {
+            Tienda tienda = tiendaOptional.get();
+
+            tienda.getTallas().forEach(talla -> {
+                talla.getPrendas().forEach(prenda -> prenda.setTalla(null));
+                talla.getPrendas().clear();
+            });
+
+            tienda.getPrendas().clear();
+
+            tienda.getTallas().forEach(talla -> talla.setTienda(null));
+            tienda.getTallas().clear();
+
+            tiendaRepository.save(tienda);
+
+            tiendaRepository.delete(tienda);
             return true;
         }
         return false;
