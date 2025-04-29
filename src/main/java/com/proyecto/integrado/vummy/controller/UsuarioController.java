@@ -36,7 +36,7 @@ public class UsuarioController {
     return ResponseEntity.ok(usuarioService.obtenerTodos());
   }
 
-  @GetMapping("/perfil")
+  @GetMapping("/profile")
   public ResponseEntity<UsuarioDTO> obtenerMiPerfil(HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
