@@ -1,6 +1,8 @@
 package com.proyecto.integrado.vummy.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -11,14 +13,14 @@ import com.proyecto.integrado.vummy.dto.UsuarioDTO;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
 import com.proyecto.integrado.vummy.repository.UsuarioRepository;
-import com.proyecto.integrado.vummy.security.jwt.JwtService;  // Importa JwtService
+import com.proyecto.integrado.vummy.security.jwt.JwtService;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;  // Inyecta el servicio JwtService
+    private final JwtService jwtService;
 
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
@@ -43,10 +45,23 @@ public class UsuarioService {
                 .map(this::convertirAUsuarioDTO);
     }
 
-    public Optional<UsuarioDTO> obtenerPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
-                .map(this::convertirAUsuarioDTO);
-    }
+    public Optional<Map<String, Object>> obtenerPorEmail(String email) {
+    return usuarioRepository.findByEmail(email)
+            .map(usuario -> {
+                Map<String, Object> resultado = new HashMap<>();
+                resultado.put("id", usuario.getId());
+                resultado.put("nombre", usuario.getNombre());
+                resultado.put("email", usuario.getEmail());
+                resultado.put("altura", usuario.getAltura());
+                resultado.put("cuelloManga", usuario.getCuelloManga());
+                resultado.put("pecho", usuario.getPecho());
+                resultado.put("cintura", usuario.getCintura());
+                resultado.put("cadera", usuario.getCadera());
+                resultado.put("entrepierna", usuario.getEntrepierna());
+                return resultado;
+            });
+}
+
 
     public UsuarioDTO registrarUsuario(Usuario usuario) {
       boolean existeUsuario = usuarioRepository.findByEmail(usuario.getEmail()).isPresent()
