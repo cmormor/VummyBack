@@ -10,7 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "prendas")
+@Table(name = "prendas", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"nombre", "tienda_id"})
+    })
 public class Prenda {
 
     @Id
@@ -20,10 +22,10 @@ public class Prenda {
     @Column(nullable = false)
     private String nombre;
 
-    @ManyToOne
-    @JoinColumn(name = "talla_id", nullable = false)
-    @JsonBackReference
-    private Talla talla;
+    // @ManyToOne
+    // @JoinColumn(name = "talla_id")
+    // @JsonBackReference
+    // private Talla talla;
 
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)
@@ -31,5 +33,10 @@ public class Prenda {
     private Tienda tienda;
 
     private Double precio;
-}
+    
+    private String descripcion;
+
+    @Column(nullable = false)
+    private Long stock = 0L;
+  }
 

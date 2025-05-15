@@ -29,9 +29,11 @@ public class TiendaService {
                   prenda.getId(),
                   prenda.getNombre(),
                   prenda.getPrecio(),
-                  prenda.getTalla().getId(),
+                  prenda.getDescripcion(),
+                  prenda.getStock(),
+                  // prenda.getTalla().getId(),
                   prenda.getTienda().getId(),
-                  prenda.getTalla().getNombre().name(),
+                  // prenda.getTalla().getNombre().name(),
                   prenda.getTienda().getNombre()
               ))
               .collect(Collectors.toList())
@@ -88,9 +90,11 @@ public class TiendaService {
                           prenda.getId(),
                           prenda.getNombre(),
                           prenda.getPrecio(),
-                          prenda.getTalla().getId(),
+                          prenda.getDescripcion(),
+                          prenda.getStock(),
+                          // prenda.getTalla().getId(),
                           prenda.getTienda().getId(),
-                          prenda.getTalla().getNombre().name(),
+                          // prenda.getTalla().getNombre().name(),
                           prenda.getTienda().getNombre()
                   ))
                   .collect(Collectors.toList());
@@ -128,10 +132,10 @@ public class TiendaService {
         if (tiendaOptional.isPresent()) {
             Tienda tienda = tiendaOptional.get();
 
-            tienda.getTallas().forEach(talla -> {
-                talla.getPrendas().forEach(prenda -> prenda.setTalla(null));
-                talla.getPrendas().clear();
-            });
+            // tienda.getTallas().forEach(talla -> {
+            //     talla.getPrendas().forEach(prenda -> prenda.setTalla(null));
+            //     talla.getPrendas().clear();
+            // });
 
             tienda.getPrendas().clear();
 

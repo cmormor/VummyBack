@@ -2,12 +2,12 @@ package com.proyecto.integrado.vummy.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+// import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+// import java.util.List;
 
 @Getter
 @Setter
@@ -33,9 +33,9 @@ public class Talla {
     private Double cadera;
     private Double entrepierna;
 
-    @OneToMany(mappedBy = "talla", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Prenda> prendas;
+    // @OneToMany(mappedBy = "talla", cascade = CascadeType.ALL, orphanRemoval = true)
+    // @JsonManagedReference
+    // private List<Prenda> prendas;
 
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)

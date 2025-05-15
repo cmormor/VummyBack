@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface PrendaRepository extends JpaRepository<Prenda, Long> {
     List<Prenda> findByTiendaId(Long tiendaId);
+    boolean existsByNombreAndTiendaId(String nombre, Long tiendaId);
 }
