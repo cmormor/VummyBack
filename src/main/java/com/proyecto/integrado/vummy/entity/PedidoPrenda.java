@@ -23,5 +23,9 @@ public class PedidoPrenda {
     @JoinColumn(name = "prenda_id", nullable = false)
     private Prenda prenda;
 
+    @ManyToOne
+    @JoinColumn(name = "talla_id", nullable = false)
+    private Talla talla;
+
     private Integer cantidad;
 }

@@ -4,6 +4,12 @@ import com.proyecto.integrado.vummy.entity.Pedido;
 import com.proyecto.integrado.vummy.entity.EstadoPedido;
 import com.proyecto.integrado.vummy.entity.PedidoPrenda;
 import com.proyecto.integrado.vummy.repository.PedidoRepository;
+import com.proyecto.integrado.vummy.repository.PrendaRepository;
+import com.proyecto.integrado.vummy.dto.PedidoDTO;
+import com.proyecto.integrado.vummy.dto.PedidoPrendaDTO;
+import com.proyecto.integrado.vummy.repository.TallaRepository;
+import com.proyecto.integrado.vummy.repository.PrendaTallaTiendaRepository;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +20,16 @@ import java.util.Optional;
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final PrendaRepository prendaRepository;
+    private final TallaRepository tallaRepository;
+    private final PrendaTallaTiendaRepository prendaTallaTiendaRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, PrendaRepository prendaRepository,
+            TallaRepository tallaRepository, PrendaTallaTiendaRepository prendaTallaTiendaRepository) {
         this.pedidoRepository = pedidoRepository;
+        this.prendaRepository = prendaRepository;
+        this.tallaRepository = tallaRepository;
+        this.prendaTallaTiendaRepository = prendaTallaTiendaRepository;
     }
 
     public List<Pedido> obtenerTodos() {
@@ -32,6 +45,28 @@ public class PedidoService {
     }
 
     public Pedido agregarPedido(Pedido pedido) {
+        if (pedido.getPrendas() != null) {
+            for (PedidoPrenda pp : pedido.getPrendas()) {
+                Long prendaId = pp.getPrenda().getId();
+                Long tallaId = pp.getTalla().getId();
+
+                pp.setPrenda(prendaRepository.findById(prendaId)
+                        .orElseThrow(() -> new RuntimeException("Prenda no encontrada: " + prendaId)));
+                pp.setTalla(tallaRepository.findById(tallaId)
+                        .orElseThrow(() -> new RuntimeException("Talla no encontrada: " + tallaId)));
+
+                Long tiendaId = prendaTallaTiendaRepository.findTiendaIdByPrendaId(prendaId);
+                boolean existe = prendaTallaTiendaRepository
+                        .findByPrendaIdAndTiendaId(prendaId, tiendaId)
+                        .stream()
+                        .anyMatch(ptt -> ptt.getTalla().getId().equals(tallaId));
+                if (!existe) {
+                    throw new RuntimeException("La talla seleccionada no está asignada a la prenda");
+                }
+
+                pp.setPedido(pedido);
+            }
+        }
         pedido.setFecha(java.time.LocalDateTime.now());
         pedido.setEstado(EstadoPedido.CONFIRMADO);
         pedido.setTotal(calcularTotal(pedido.getPrendas()));
@@ -73,5 +108,39 @@ public class PedidoService {
             }
             pedidoRepository.save(pedido);
         }
+    }
+
+    public PedidoDTO toPedidoDTO(Pedido pedido) {
+        PedidoDTO dto = new PedidoDTO();
+        dto.setId(pedido.getId());
+
+        PedidoDTO.UsuarioInfo usuarioInfo = new PedidoDTO.UsuarioInfo();
+        usuarioInfo.setId(pedido.getUsuario().getId());
+        usuarioInfo.setNombre(pedido.getUsuario().getNombre());
+        dto.setUsuario(usuarioInfo);
+
+        dto.setFecha(pedido.getFecha());
+        dto.setEstado(pedido.getEstado().name());
+        dto.setTotal(pedido.getTotal());
+
+        List<PedidoPrendaDTO> prendasDTO = pedido.getPrendas().stream().map(pp -> {
+            PedidoPrendaDTO ppDTO = new PedidoPrendaDTO();
+            PedidoPrendaDTO.PrendaInfo prendaInfo = new PedidoPrendaDTO.PrendaInfo();
+            prendaInfo.setId(pp.getPrenda().getId());
+            prendaInfo.setNombre(pp.getPrenda().getNombre());
+            prendaInfo.setPrecio(pp.getPrenda().getPrecio());
+            ppDTO.setPrenda(prendaInfo);
+
+            PedidoPrendaDTO.TallaInfo tallaInfo = new PedidoPrendaDTO.TallaInfo();
+            tallaInfo.setId(pp.getTalla().getId());
+            tallaInfo.setNombre(pp.getTalla().getNombre().name());
+            ppDTO.setTalla(tallaInfo);
+
+            ppDTO.setCantidad(pp.getCantidad());
+            return ppDTO;
+        }).toList();
+
+        dto.setPrendas(prendasDTO);
+        return dto;
     }
 }
