@@ -4,8 +4,10 @@ import lombok.Data;
 
 @Data
 public class PedidoPrendaDTO {
+    private Long id;
     private PrendaInfo prenda;
     private TallaInfo talla;
+    private PedidoInfo pedido;
     private Integer cantidad;
 
     @Data
@@ -19,5 +21,11 @@ public class PedidoPrendaDTO {
     public static class TallaInfo {
         private Long id;
         private String nombre;
+    }
+
+    @Data
+    public static class PedidoInfo {
+        private Long id;
+        private String usuario;
     }
 }

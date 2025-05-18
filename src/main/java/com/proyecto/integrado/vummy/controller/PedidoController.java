@@ -91,8 +91,9 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Pedido> actualizarEstado(@PathVariable Long id, @RequestParam EstadoPedido estado) {
+    public ResponseEntity<PedidoDTO> actualizarEstado(@PathVariable Long id, @RequestParam EstadoPedido estado) {
         return pedidoService.actualizarEstado(id, estado)
+                .map(pedidoService::toPedidoDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
