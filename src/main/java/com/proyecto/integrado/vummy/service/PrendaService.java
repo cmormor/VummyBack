@@ -39,9 +39,7 @@ public class PrendaService {
                         prenda.getPrecio(),
                         prenda.getDescripcion(),
                         calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
-                        // prenda.getTalla().getId(),
                         prenda.getTienda().getId(),
-                        // prenda.getTalla().getNombre().name(),
                         prenda.getTienda().getNombre()
                 ))
                 .collect(Collectors.toList());
@@ -54,9 +52,7 @@ public class PrendaService {
                 prenda.getPrecio(),
                 prenda.getDescripcion(),
                calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
-                // prenda.getTalla().getId(),
                 prenda.getTienda().getId(),
-                // prenda.getTalla().getNombre().name(),
                 prenda.getTienda().getNombre()
         ));
     }
@@ -72,9 +68,7 @@ public class PrendaService {
                 prendaGuardada.getPrecio(),
                 prenda.getDescripcion(),
                calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
-                // prendaGuardada.getTalla().getId(),
                 prendaGuardada.getTienda().getId(),
-                // prendaGuardada.getTalla().getNombre().name(),
                 prendaGuardada.getTienda().getNombre()
         );
     }
@@ -100,9 +94,7 @@ public class PrendaService {
                     prendaActualizada.getPrecio(),
                     prenda.getDescripcion(),
                    calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
-                    // prendaActualizada.getTalla().getId(),
                     prendaActualizada.getTienda().getId(),
-                    // prendaActualizada.getTalla().getNombre().name(),
                     prendaActualizada.getTienda().getNombre()
             ));
         }
@@ -126,15 +118,11 @@ public class PrendaService {
                         prenda.getPrecio(),
                         prenda.getDescripcion(),
                        calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
-                        // prenda.getTalla().getId(),
                         prenda.getTienda().getId(),
-                        // prenda.getTalla().getNombre().name(),
                         prenda.getTienda().getNombre()
                 ))
                 .collect(Collectors.toList());
     }
-
-    
 
     public boolean eliminarPrenda(Long id) {
       if (prendaRepository.existsById(id)) {

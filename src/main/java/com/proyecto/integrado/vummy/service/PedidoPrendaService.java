@@ -1,6 +1,7 @@
 package com.proyecto.integrado.vummy.service;
 
 import com.proyecto.integrado.vummy.dto.PedidoPrendaDTO;
+import com.proyecto.integrado.vummy.entity.Pedido;
 import com.proyecto.integrado.vummy.entity.PedidoPrenda;
 import com.proyecto.integrado.vummy.repository.PedidoPrendaRepository;
 import com.proyecto.integrado.vummy.repository.PedidoRepository;
@@ -50,7 +51,17 @@ public class PedidoPrendaService {
         pedidoPrenda.setPedido(
                 pedidoRepository.findById(pedidoPrenda.getPedido().getId())
                         .orElseThrow(() -> new RuntimeException("Pedido no encontrado")));
-        return pedidoPrendaRepository.save(pedidoPrenda);
+        PedidoPrenda guardado = pedidoPrendaRepository.save(pedidoPrenda);
+
+        Pedido pedido = guardado.getPedido();
+        List<PedidoPrenda> prendasActualizadas = pedidoPrendaRepository.findByPedidoId(pedido.getId());
+        double nuevoTotal = prendasActualizadas.stream()
+            .mapToDouble(pp -> pp.getPrenda().getPrecio() * pp.getCantidad())
+            .sum();
+        pedido.setTotal(nuevoTotal);
+        pedidoRepository.save(pedido);
+
+        return guardado;
     }
 
     public Optional<PedidoPrenda> actualizarCantidad(Long id, int cantidad) {
@@ -58,20 +69,40 @@ public class PedidoPrendaService {
         if (pedidoPrendaOptional.isPresent()) {
             PedidoPrenda pedidoPrenda = pedidoPrendaOptional.get();
             pedidoPrenda.setCantidad(cantidad);
-            return Optional.of(pedidoPrendaRepository.save(pedidoPrenda));
+            PedidoPrenda actualizado = pedidoPrendaRepository.save(pedidoPrenda);
+
+            Pedido pedido = pedidoPrenda.getPedido();
+            double nuevoTotal = pedido.getPrendas().stream()
+                .mapToDouble(pp -> pp.getPrenda().getPrecio() * pp.getCantidad())
+                .sum();
+            pedido.setTotal(nuevoTotal);
+            pedidoRepository.save(pedido);
+
+            return Optional.of(actualizado);
         }
         return Optional.empty();
     }
 
     public boolean eliminarPedidoPrenda(Long id) {
-        if (pedidoPrendaRepository.existsById(id)) {
+        Optional<PedidoPrenda> pedidoPrendaOptional = pedidoPrendaRepository.findById(id);
+        if (pedidoPrendaOptional.isPresent()) {
+            PedidoPrenda pedidoPrenda = pedidoPrendaOptional.get();
+            Pedido pedido = pedidoPrenda.getPedido();
             pedidoPrendaRepository.deleteById(id);
+
+            double nuevoTotal = pedido.getPrendas().stream()
+                .filter(pp -> !pp.getId().equals(id))
+                .mapToDouble(pp -> pp.getPrenda().getPrecio() * pp.getCantidad())
+                .sum();
+            pedido.setTotal(nuevoTotal);
+            pedidoRepository.save(pedido);
+
             return true;
         }
         return false;
     }
 
-    public PedidoPrendaDTO toDTO(PedidoPrenda pedidoPrenda) {
+    public PedidoPrendaDTO toPedidoPrendaDTO(PedidoPrenda pedidoPrenda) {
         PedidoPrendaDTO dto = new PedidoPrendaDTO();
         dto.setId(pedidoPrenda.getId());
 

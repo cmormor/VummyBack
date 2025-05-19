@@ -23,14 +23,14 @@ public class PedidoPrendaController {
         return ResponseEntity.ok(
                 pedidoPrendaService.obtenerTodos()
                         .stream()
-                        .map(pedidoPrendaService::toDTO)
+                        .map(pedidoPrendaService::toPedidoPrendaDTO)
                         .toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PedidoPrendaDTO> obtenerPorId(@PathVariable Long id) {
         return pedidoPrendaService.obtenerPorId(id)
-                .map(pedidoPrendaService::toDTO)
+                .map(pedidoPrendaService::toPedidoPrendaDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -40,25 +40,23 @@ public class PedidoPrendaController {
         return ResponseEntity.ok(
                 pedidoPrendaService.obtenerPorPedido(pedidoId)
                         .stream()
-                        .map(pedidoPrendaService::toDTO)
+                        .map(pedidoPrendaService::toPedidoPrendaDTO)
                         .toList());
     }
 
     @PostMapping
     public ResponseEntity<PedidoPrendaDTO> agregarPedidoPrenda(@RequestBody PedidoPrenda pedidoPrenda) {
         PedidoPrenda saved = pedidoPrendaService.guardarPedidoPrenda(pedidoPrenda);
-        return ResponseEntity.ok(pedidoPrendaService.toDTO(saved));
+        return ResponseEntity.ok(pedidoPrendaService.toPedidoPrendaDTO(saved));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PedidoPrendaDTO> actualizarCantidad(@PathVariable Long id, @RequestParam int cantidad) {
         return pedidoPrendaService.actualizarCantidad(id, cantidad)
-                .map(pedidoPrendaService::toDTO)
+                .map(pedidoPrendaService::toPedidoPrendaDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    // TODO: NO ME RECALCULA EL TOTAL AL ACTUALIZAR LA CANTIDAD
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPedidoPrenda(@PathVariable Long id) {
@@ -67,6 +65,4 @@ public class PedidoPrendaController {
         }
         return ResponseEntity.notFound().build();
     }
-
-    // TODO: NO ME RECALCULA EL TOTAL AL ELIMINAR UN ITEM
 }

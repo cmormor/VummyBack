@@ -31,11 +31,9 @@ public class TiendaService {
                   prenda.getPrecio(),
                   prenda.getDescripcion(),
                   prenda.getStock(),
-                  // prenda.getTalla().getId(),
                   prenda.getTienda().getId(),
-                  // prenda.getTalla().getNombre().name(),
                   prenda.getTienda().getNombre()
-              ))
+                ))
               .collect(Collectors.toList())
           : new ArrayList<>();
   
@@ -92,9 +90,7 @@ public class TiendaService {
                           prenda.getPrecio(),
                           prenda.getDescripcion(),
                           prenda.getStock(),
-                          // prenda.getTalla().getId(),
                           prenda.getTienda().getId(),
-                          // prenda.getTalla().getNombre().name(),
                           prenda.getTienda().getNombre()
                   ))
                   .collect(Collectors.toList());
@@ -131,11 +127,6 @@ public class TiendaService {
         Optional<Tienda> tiendaOptional = tiendaRepository.findById(id);
         if (tiendaOptional.isPresent()) {
             Tienda tienda = tiendaOptional.get();
-
-            // tienda.getTallas().forEach(talla -> {
-            //     talla.getPrendas().forEach(prenda -> prenda.setTalla(null));
-            //     talla.getPrendas().clear();
-            // });
 
             tienda.getPrendas().clear();
 

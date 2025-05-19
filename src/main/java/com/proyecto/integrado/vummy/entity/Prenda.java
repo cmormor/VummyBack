@@ -22,11 +22,6 @@ public class Prenda {
     @Column(nullable = false)
     private String nombre;
 
-    // @ManyToOne
-    // @JoinColumn(name = "talla_id")
-    // @JsonBackReference
-    // private Talla talla;
-
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)
     @JsonBackReference

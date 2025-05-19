@@ -2,7 +2,6 @@ package com.proyecto.integrado.vummy.controller;
 
 import com.proyecto.integrado.vummy.dto.PrendaDTO;
 import com.proyecto.integrado.vummy.entity.Prenda;
-// import com.proyecto.integrado.vummy.entity.Talla;
 import com.proyecto.integrado.vummy.entity.Tienda;
 import com.proyecto.integrado.vummy.service.PrendaService;
 import org.springframework.http.ResponseEntity;
@@ -49,13 +48,6 @@ public class PrendaController {
                     .orElseThrow(() -> new RuntimeException("Tienda no encontrada"));
             prenda.setTienda(tienda);
         }
-
-        // if (prendaDTO.getTallaId() != null) {
-        //     Talla talla = prendaService.obtenerTallaPorId(prendaDTO.getTallaId())
-        //             .orElseThrow(() -> new RuntimeException("Talla no encontrada"));
-        //     prenda.setTalla(talla);
-        // }
-
         PrendaDTO prendaGuardadaDTO = prendaService.guardarPrenda(prenda);
         return ResponseEntity.status(201).body(prendaGuardadaDTO);
     }
@@ -75,15 +67,6 @@ public class PrendaController {
         } else {
             prendaActualizada.setTienda(null);
         }
-
-        // if (prendaDTO.getTallaId() != null) {
-        //     Talla talla = new Talla();
-        //     talla.setId(prendaDTO.getTallaId());
-        //     prendaActualizada.setTalla(talla);
-        // } else {
-        //     prendaActualizada.setTalla(null);
-        // }
-
         return prendaService.actualizarPrenda(id, prendaActualizada)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

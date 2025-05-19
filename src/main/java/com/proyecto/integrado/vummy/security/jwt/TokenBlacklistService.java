@@ -17,7 +17,6 @@ public class TokenBlacklistService {
     public boolean isTokenBlacklisted(String token) {
         Long expirationTime = blacklistedTokens.get(token);
 
-        // Eliminar el token si ya expiró
         if (expirationTime != null && expirationTime < System.currentTimeMillis()) {
             blacklistedTokens.remove(token);
             return false;

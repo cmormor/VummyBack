@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface PedidoPrendaRepository extends JpaRepository<PedidoPrenda, Long> {
-    List<PedidoPrenda> findByPedidoId(Long pedidoId); // Obtener prendas de un pedido
+    List<PedidoPrenda> findByPedidoId(Long pedidoId);
 }
