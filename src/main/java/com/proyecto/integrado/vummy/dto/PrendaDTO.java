@@ -14,8 +14,9 @@ public class PrendaDTO {
     private Long stock;
     private Long tiendaId;
     private String tiendaNombre;
+    private String imagen;
 
-    public PrendaDTO(Long id, String nombre, Double precio, String descripcion, Long stock, Long tiendaId, String tiendaNombre) {
+    public PrendaDTO(Long id, String nombre, Double precio, String descripcion, Long stock, Long tiendaId, String tiendaNombre, String imagen) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
@@ -23,5 +24,6 @@ public class PrendaDTO {
         this.stock = (stock != null) ? stock : 0L;         
         this.tiendaId = tiendaId;
         this.tiendaNombre = tiendaNombre;
+        this.imagen = imagen;
     }
 }

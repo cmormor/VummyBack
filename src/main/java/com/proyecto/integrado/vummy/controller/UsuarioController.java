@@ -36,6 +36,21 @@ public class UsuarioController {
     return ResponseEntity.ok(usuarioService.obtenerTodos());
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<UsuarioDTO> obtenerUsuarioPorId(@PathVariable Long id) {
+      return usuarioService.obtenerPorId(id)
+              .map(ResponseEntity::ok)
+              .orElse(ResponseEntity.notFound().build());
+  }
+
+  @GetMapping("/{id}/role")
+  public ResponseEntity<String> obtenerRolPorId(@PathVariable Long id) {
+      return usuarioService.obtenerPorId(id)
+          .map(usuarioDTO -> usuarioDTO.getRol().toString())
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+  }
+
   @GetMapping("/profile")
   public ResponseEntity<UsuarioDTO> obtenerMiPerfil(HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");

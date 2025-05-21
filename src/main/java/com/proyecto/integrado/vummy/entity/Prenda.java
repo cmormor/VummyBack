@@ -33,5 +33,8 @@ public class Prenda {
 
     @Column(nullable = false)
     private Long stock = 0L;
+    
+    @Column(name = "imagen", columnDefinition = "TEXT")
+    private String imagen;
   }
 

@@ -32,7 +32,8 @@ public class TiendaService {
                   prenda.getDescripcion(),
                   prenda.getStock(),
                   prenda.getTienda().getId(),
-                  prenda.getTienda().getNombre()
+                  prenda.getTienda().getNombre(),
+                  prenda.getImagen()
                 ))
               .collect(Collectors.toList())
           : new ArrayList<>();
@@ -91,7 +92,8 @@ public class TiendaService {
                           prenda.getDescripcion(),
                           prenda.getStock(),
                           prenda.getTienda().getId(),
-                          prenda.getTienda().getNombre()
+                          prenda.getTienda().getNombre(),
+                          prenda.getImagen()
                   ))
                   .collect(Collectors.toList());
       }

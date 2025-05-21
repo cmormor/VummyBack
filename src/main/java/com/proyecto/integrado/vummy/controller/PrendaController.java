@@ -4,8 +4,10 @@ import com.proyecto.integrado.vummy.dto.PrendaDTO;
 import com.proyecto.integrado.vummy.entity.Prenda;
 import com.proyecto.integrado.vummy.entity.Tienda;
 import com.proyecto.integrado.vummy.service.PrendaService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -42,6 +44,7 @@ public class PrendaController {
         prenda.setNombre(prendaDTO.getNombre());
         prenda.setPrecio(prendaDTO.getPrecio());
         prenda.setDescripcion(prendaDTO.getDescripcion());
+        prenda.setImagen(prendaDTO.getImagen());
 
         if (prendaDTO.getTiendaId() != null) {
             Tienda tienda = prendaService.obtenerTiendaPorId(prendaDTO.getTiendaId())
@@ -70,6 +73,26 @@ public class PrendaController {
         return prendaService.actualizarPrenda(id, prendaActualizada)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(value = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> subirImagen(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            prendaService.guardarImagen(id, file);
+            return ResponseEntity.ok("Imagen guardada correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/imagen")
+    public ResponseEntity<?> eliminarImagen(@PathVariable Long id) {
+        try {
+            prendaService.eliminarImagen(id);
+            return ResponseEntity.ok("Imagen eliminada correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
