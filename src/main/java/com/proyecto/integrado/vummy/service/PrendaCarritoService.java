@@ -12,17 +12,26 @@ import java.util.List;
 public class PrendaCarritoService {
 
     @Autowired
-    private PrendaCarritoRepository repo;
+    private PrendaCarritoRepository prendaCarritoRepository;
 
     public void guardarPedidoCarrito(PrendaCarrito pedido) {
-        repo.save(pedido);
+        prendaCarritoRepository.save(pedido);
     }
 
     public List<PrendaCarrito> obtenerPorCorreo(String correo) {
-        return repo.findByCorreo(correo);
+        return prendaCarritoRepository.findByCorreoOrderByIdAsc(correo);
     }
 
-    public void vaciarCarrito(String correo) {
-        repo.deleteByCorreo(correo);
+    public PrendaCarrito obtenerPorId(Long id) {
+    return prendaCarritoRepository.findById(id).orElse(null);
     }
+
+    public void vaciarCarritoPorCorreo(String correo) {
+        prendaCarritoRepository.deleteByCorreo(correo);
+    }
+ 
+    public void eliminarPorId(Long id) {
+    prendaCarritoRepository.deleteById(id);
+    }
+
 }

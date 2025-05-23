@@ -8,5 +8,6 @@ import com.proyecto.integrado.vummy.entity.PrendaCarrito;
 
 public interface PrendaCarritoRepository extends JpaRepository<PrendaCarrito, Long> {
     List<PrendaCarrito> findByCorreo(String correo);
+    List<PrendaCarrito> findByCorreoOrderByIdAsc(String correo);
     void deleteByCorreo(String correo);
 }

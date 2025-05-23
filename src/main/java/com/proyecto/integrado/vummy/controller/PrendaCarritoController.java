@@ -6,12 +6,16 @@ import com.proyecto.integrado.vummy.entity.Usuario;
 import com.proyecto.integrado.vummy.repository.UsuarioRepository;
 import com.proyecto.integrado.vummy.security.jwt.JwtService;
 import com.proyecto.integrado.vummy.service.PrendaCarritoService;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -98,4 +102,65 @@ public class PrendaCarritoController {
       return ResponseEntity.ok(carritoFiltrado);
   }
 
+  @PutMapping("/{id}")
+  public ResponseEntity<?> actualizarCantidad(@PathVariable Long id,
+                                              @RequestBody ItemCarritoDTO dto,
+                                              @RequestHeader("Authorization") String authHeader) {
+      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+          return ResponseEntity.status(401).body("Token no válido");
+      }
+
+      String token = authHeader.substring(7);
+      String correo;
+      try {
+          correo = jwtService.extractEmail(token);
+      } catch (Exception e) {
+          return ResponseEntity.status(401).body("Token inválido o expirado");
+      }
+
+      PrendaCarrito prendaCarrito = servicio.obtenerPorId(id);
+      if (prendaCarrito == null || !prendaCarrito.getCorreo().equals(correo)) {
+          return ResponseEntity.status(404).body("Elemento no encontrado o no pertenece al usuario");
+      }
+
+      prendaCarrito.setCantidad(dto.getCantidad());
+      servicio.guardarPedidoCarrito(prendaCarrito);
+
+      return ResponseEntity.ok().build();
+  }
+
+  @Transactional
+  @DeleteMapping
+  public ResponseEntity<?> eliminarTodoElCarrito(@RequestHeader("Authorization") String authHeader) {
+      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+          return ResponseEntity.status(401).body("Token no válido");
+      }
+
+      String token = authHeader.substring(7);
+      String correo;
+      try {
+          correo = jwtService.extractEmail(token);
+      } catch (Exception e) {
+          return ResponseEntity.status(401).body("Token inválido o expirado");
+      }
+
+      Usuario usuario = usuarioRepository.findByEmail(correo).orElse(null);
+      if (usuario == null) {
+          return ResponseEntity.status(404).body("Usuario no encontrado");
+      }
+
+      servicio.vaciarCarritoPorCorreo(correo);
+      return ResponseEntity.ok("Carrito eliminado correctamente");
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
+      PrendaCarrito prenda = servicio.obtenerPorId(id);
+      if (prenda == null) {
+          return ResponseEntity.notFound().build();
+      }
+
+      servicio.eliminarPorId(id);
+      return ResponseEntity.noContent().build();
+  }
 }
