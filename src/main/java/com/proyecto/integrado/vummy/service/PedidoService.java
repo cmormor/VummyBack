@@ -160,13 +160,14 @@ public class PedidoService {
         List<PedidoPrendaDTO> prendasDTO = pedido.getPrendas().stream().map(pp -> {
             PedidoPrendaDTO ppDTO = new PedidoPrendaDTO();
 
-            // Aquí asignas el id de la relación PedidoPrenda (pp)
             ppDTO.setId(pp.getId());
 
             PedidoPrendaDTO.PrendaInfo prendaInfo = new PedidoPrendaDTO.PrendaInfo();
             prendaInfo.setId(pp.getPrenda().getId());
             prendaInfo.setNombre(pp.getPrenda().getNombre());
+            prendaInfo.setDescripcion(pp.getPrenda().getDescripcion());
             prendaInfo.setPrecio(pp.getPrenda().getPrecio());
+            prendaInfo.setTiendaNombre(pp.getPrenda().getTienda().getNombre());
             ppDTO.setPrenda(prendaInfo);
 
             PedidoPrendaDTO.TallaInfo tallaInfo = new PedidoPrendaDTO.TallaInfo();

@@ -14,7 +14,9 @@ public class PedidoPrendaDTO {
     public static class PrendaInfo {
         private Long id;
         private String nombre;
+        private String descripcion;
         private Double precio;
+        private String tiendaNombre;
     }
 
     @Data
