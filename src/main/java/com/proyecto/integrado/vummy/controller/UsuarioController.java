@@ -1,6 +1,7 @@
 package com.proyecto.integrado.vummy.controller;
 
 import com.proyecto.integrado.vummy.dto.LoginRequestDTO;
+import com.proyecto.integrado.vummy.dto.ResetearContrasena;
 import com.proyecto.integrado.vummy.dto.UsuarioDTO;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
@@ -102,6 +103,19 @@ public class UsuarioController {
     }
 
     return ResponseEntity.ok("Sesión cerrada exitosamente");
+  }
+
+  @PutMapping("/auth/reset-password")
+  public ResponseEntity<String> resetearContrasena(@RequestBody ResetearContrasena resetPasswordDTO) {
+    boolean actualizado = usuarioService.resetearContrasena(
+        resetPasswordDTO.getEmail(),
+        resetPasswordDTO.getNewPassword());
+    if (actualizado) {
+      return ResponseEntity.ok("Contraseña actualizada correctamente");
+    } else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("Usuario con ese correo no encontrado");
+    }
   }
 
   @PutMapping("/profile")

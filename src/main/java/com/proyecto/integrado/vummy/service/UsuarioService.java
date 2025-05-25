@@ -102,6 +102,18 @@ public class UsuarioService {
                 });
     }
 
+    public boolean resetearContrasena(String email, String nuevaContrasena) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+        Usuario usuario = usuarioOpt.get();
+        String encodedPassword = passwordEncoder.encode(nuevaContrasena);
+        usuario.setPassword(encodedPassword);
+        usuarioRepository.save(usuario);
+        return true;
+    }
+
     public Optional<UsuarioDTO> actualizarRol(Long usuarioId, Rol nuevoRol) {
         return usuarioRepository.findById(usuarioId)
                 .map(usuario -> {
