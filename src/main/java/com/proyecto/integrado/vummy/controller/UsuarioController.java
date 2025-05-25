@@ -24,8 +24,8 @@ public class UsuarioController {
   private final TokenBlacklistService tokenBlacklistService;
 
   public UsuarioController(UsuarioService usuarioService,
-               JwtService jwtService,
-               TokenBlacklistService tokenBlacklistService) {
+      JwtService jwtService,
+      TokenBlacklistService tokenBlacklistService) {
     this.usuarioService = usuarioService;
     this.jwtService = jwtService;
     this.tokenBlacklistService = tokenBlacklistService;
@@ -38,17 +38,17 @@ public class UsuarioController {
 
   @GetMapping("/{id}")
   public ResponseEntity<UsuarioDTO> obtenerUsuarioPorId(@PathVariable Long id) {
-      return usuarioService.obtenerPorId(id)
-              .map(ResponseEntity::ok)
-              .orElse(ResponseEntity.notFound().build());
+    return usuarioService.obtenerPorId(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @GetMapping("/{id}/role")
   public ResponseEntity<String> obtenerRolPorId(@PathVariable Long id) {
-      return usuarioService.obtenerPorId(id)
-          .map(usuarioDTO -> usuarioDTO.getRol().toString())
-          .map(ResponseEntity::ok)
-          .orElse(ResponseEntity.notFound().build());
+    return usuarioService.obtenerPorId(id)
+        .map(usuarioDTO -> usuarioDTO.getRol().toString())
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @GetMapping("/profile")
@@ -72,8 +72,7 @@ public class UsuarioController {
               (Double) map.get("cintura"),
               (Double) map.get("cadera"),
               (Double) map.get("entrepierna"),
-              null
-          );
+              null);
           return ResponseEntity.ok(usuarioDTO);
         })
         .orElse(ResponseEntity.notFound().build());
@@ -105,9 +104,19 @@ public class UsuarioController {
     return ResponseEntity.ok("Sesión cerrada exitosamente");
   }
 
-  @PutMapping("/{id}")
-  public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
-    return usuarioService.actualizarUsuario(id, usuario)
+  @PutMapping("/profile")
+  public ResponseEntity<UsuarioDTO> actualizarMiPerfil(HttpServletRequest request,
+      @RequestBody Usuario usuarioActualizado) {
+    String authHeader = request.getHeader("Authorization");
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      return ResponseEntity.status(401).build();
+    }
+
+    String token = authHeader.substring(7);
+    String email = jwtService.extractEmail(token);
+
+    return usuarioService.obtenerUsuarioPorEmailByRepository(email)
+        .flatMap(usuarioExistente -> usuarioService.actualizarUsuario(usuarioExistente.getId(), usuarioActualizado))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
