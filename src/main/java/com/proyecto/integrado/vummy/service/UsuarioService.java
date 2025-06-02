@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.proyecto.integrado.vummy.dto.ErrorValidacionDTO;
 import com.proyecto.integrado.vummy.dto.UsuarioDTO;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
+import com.proyecto.integrado.vummy.exceptions.ValidacionException;
 import com.proyecto.integrado.vummy.repository.UsuarioRepository;
 import com.proyecto.integrado.vummy.security.jwt.JwtService;
 
@@ -67,12 +69,7 @@ public class UsuarioService {
     }
 
     public UsuarioDTO registrarUsuario(Usuario usuario) {
-        boolean existeUsuario = usuarioRepository.findByEmail(usuario.getEmail()).isPresent()
-                || usuarioRepository.findByNombre(usuario.getNombre()).isPresent();
-
-        if (existeUsuario) {
-            throw new IllegalArgumentException("El nombre o correo electrónico ya están en uso.");
-        }
+        validarUsuario(usuario);
 
         String contraseñaEncriptada = passwordEncoder.encode(usuario.getPassword());
         usuario.setPassword(contraseñaEncriptada);
@@ -159,6 +156,31 @@ public class UsuarioService {
             return true;
         }
         return false;
+    }
+
+    private void validarUsuario(Usuario usuario) {
+        ErrorValidacionDTO errores = new ErrorValidacionDTO();
+
+        if (usuario.getNombre() == null || usuario.getNombre().isBlank()) {
+            errores.agregarError("nombre", "El nombre es obligatorio.");
+        }
+
+        if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
+            errores.agregarError("email", "El correo electrónico es obligatorio.");
+        } else {
+            boolean emailExistente = usuarioRepository.findByEmail(usuario.getEmail()).isPresent();
+            if (emailExistente) {
+                errores.agregarError("email", "El correo electrónico ya está en uso.");
+            }
+        }
+
+        if (usuario.getPassword() == null || usuario.getPassword().length() < 8) {
+            errores.agregarError("password", "La contraseña debe tener al menos 8 caracteres.");
+        }
+
+        if (errores.tieneErrores()) {
+            throw new ValidacionException(errores);
+        }
     }
 
     private void validarMedidas(Usuario usuario) {
