@@ -141,10 +141,9 @@ public class PedidoService {
             tallaInfo.setNombre(pp.getTalla().getNombre().name());
             ppDTO.setTalla(tallaInfo);
 
-            // Aquí creas y asignas el PedidoInfo con id y usuario
             PedidoPrendaDTO.PedidoInfo pedidoInfo = new PedidoPrendaDTO.PedidoInfo();
             pedidoInfo.setId(pedido.getId());
-            pedidoInfo.setUsuario(pedido.getUsuario().getNombre()); // O pedido.getUsuario().getId() si prefieres el id
+            pedidoInfo.setUsuario(pedido.getUsuario().getNombre());
             ppDTO.setPedido(pedidoInfo);
 
             ppDTO.setCantidad(pp.getCantidad());

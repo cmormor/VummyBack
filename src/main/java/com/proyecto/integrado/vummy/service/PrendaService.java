@@ -44,8 +44,7 @@ public class PrendaService {
                         calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
                         prenda.getTienda().getId(),
                         prenda.getTienda().getNombre(),
-                        prenda.getImagen()
-                ))
+                        prenda.getImagen()))
                 .collect(Collectors.toList());
     }
 
@@ -58,8 +57,7 @@ public class PrendaService {
                 calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
                 prenda.getTienda().getId(),
                 prenda.getTienda().getNombre(),
-                prenda.getImagen()
-        ));
+                prenda.getImagen()));
     }
 
     public PrendaDTO guardarPrenda(Prenda prenda) {
@@ -75,24 +73,32 @@ public class PrendaService {
                 calcularStockTotal(prendaGuardada.getId(), prendaGuardada.getTienda().getId()),
                 prendaGuardada.getTienda().getId(),
                 prendaGuardada.getTienda().getNombre(),
-                prendaGuardada.getImagen()
-        );
+                prendaGuardada.getImagen());
     }
 
     public Optional<PrendaDTO> actualizarPrenda(Long id, Prenda prenda) {
-        if (prendaRepository.existsById(id)) {
-            Optional<Prenda> existente = prendaRepository.findById(id);
-            if (existente.isPresent()) {
-                Prenda original = existente.get();
-                if (!original.getNombre().equals(prenda.getNombre()) ||
-                        !original.getTienda().getId().equals(prenda.getTienda().getId())) {
-                    if (prendaRepository.existsByNombreAndTiendaId(prenda.getNombre(), prenda.getTienda().getId())) {
-                        throw new IllegalArgumentException("Ya existe otra prenda con ese nombre en esta tienda.");
-                    }
+        Optional<Prenda> existente = prendaRepository.findById(id);
+        if (existente.isPresent()) {
+            Prenda original = existente.get();
+
+            if (!original.getNombre().equals(prenda.getNombre()) ||
+                    !original.getTienda().getId().equals(prenda.getTienda().getId())) {
+                if (prendaRepository.existsByNombreAndTiendaId(prenda.getNombre(), prenda.getTienda().getId())) {
+                    throw new IllegalArgumentException("Ya existe otra prenda con ese nombre en esta tienda.");
                 }
             }
-            prenda.setId(id);
-            Prenda prendaActualizada = prendaRepository.save(prenda);
+
+            original.setNombre(prenda.getNombre());
+            original.setPrecio(prenda.getPrecio());
+            original.setDescripcion(prenda.getDescripcion());
+            original.setTienda(prenda.getTienda());
+
+            if (prenda.getImagen() != null && !prenda.getImagen().isEmpty()) {
+                original.setImagen(prenda.getImagen());
+            }
+
+            Prenda prendaActualizada = prendaRepository.save(original);
+
             return Optional.of(new PrendaDTO(
                     prendaActualizada.getId(),
                     prendaActualizada.getNombre(),
@@ -101,8 +107,7 @@ public class PrendaService {
                     calcularStockTotal(prendaActualizada.getId(), prendaActualizada.getTienda().getId()),
                     prendaActualizada.getTienda().getId(),
                     prendaActualizada.getTienda().getNombre(),
-                    prendaActualizada.getImagen()
-            ));
+                    prendaActualizada.getImagen()));
         }
         return Optional.empty();
     }
@@ -120,11 +125,11 @@ public class PrendaService {
     }
 
     public void eliminarImagen(Long prendaId) {
-    Prenda prenda = prendaRepository.findById(prendaId)
-            .orElseThrow(() -> new RuntimeException("Prenda no encontrada"));
-    prenda.setImagen(null);
-    prendaRepository.save(prenda);
-}
+        Prenda prenda = prendaRepository.findById(prendaId)
+                .orElseThrow(() -> new RuntimeException("Prenda no encontrada"));
+        prenda.setImagen(null);
+        prendaRepository.save(prenda);
+    }
 
     public Optional<Tienda> obtenerTiendaPorId(Long tiendaId) {
         return tiendaRepository.findById(tiendaId);
@@ -145,8 +150,7 @@ public class PrendaService {
                         calcularStockTotal(prenda.getId(), prenda.getTienda().getId()),
                         prenda.getTienda().getId(),
                         prenda.getTienda().getNombre(),
-                        prenda.getImagen()
-                ))
+                        prenda.getImagen()))
                 .collect(Collectors.toList());
     }
 
