@@ -1,6 +1,8 @@
 package com.proyecto.integrado.vummy.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -32,8 +34,10 @@ public class Talla {
 
     @ManyToOne
     @JoinColumn(name = "tienda_id", nullable = false)
-    @JsonBackReference
     private Tienda tienda;
+
+    @OneToMany(mappedBy = "talla", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PedidoPrenda> pedidoPrendas = new ArrayList<>();
 
     @JsonProperty("tienda")
     public TiendaInfo getTiendaInfo() {
