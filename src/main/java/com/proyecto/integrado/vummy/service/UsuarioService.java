@@ -17,6 +17,8 @@ import com.proyecto.integrado.vummy.exceptions.ValidacionException;
 import com.proyecto.integrado.vummy.repository.UsuarioRepository;
 import com.proyecto.integrado.vummy.security.jwt.JwtService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UsuarioService {
 
@@ -179,12 +181,12 @@ public class UsuarioService {
                 });
     }
 
+    @Transactional
     public boolean eliminarUsuario(Long id) {
-        if (usuarioRepository.existsById(id)) {
-            usuarioRepository.deleteById(id);
+        return usuarioRepository.findById(id).map(usuario -> {
+            usuarioRepository.delete(usuario);
             return true;
-        }
-        return false;
+        }).orElse(false);
     }
 
     private void validarUsuario(Usuario usuario) {

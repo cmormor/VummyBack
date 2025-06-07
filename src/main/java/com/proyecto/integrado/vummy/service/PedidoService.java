@@ -110,40 +110,6 @@ public class PedidoService {
         }
     }
 
-    // public PedidoDTO toPedidoDTO(Pedido pedido) {
-    // PedidoDTO dto = new PedidoDTO();
-    // dto.setId(pedido.getId());
-
-    // PedidoDTO.UsuarioInfo usuarioInfo = new PedidoDTO.UsuarioInfo();
-    // usuarioInfo.setId(pedido.getUsuario().getId());
-    // usuarioInfo.setNombre(pedido.getUsuario().getNombre());
-    // dto.setUsuario(usuarioInfo);
-
-    // dto.setFecha(pedido.getFecha());
-    // dto.setEstado(pedido.getEstado().name());
-    // dto.setTotal(pedido.getTotal());
-
-    // List<PedidoPrendaDTO> prendasDTO = pedido.getPrendas().stream().map(pp -> {
-    // PedidoPrendaDTO ppDTO = new PedidoPrendaDTO();
-    // PedidoPrendaDTO.PrendaInfo prendaInfo = new PedidoPrendaDTO.PrendaInfo();
-    // prendaInfo.setId(pp.getPrenda().getId());
-    // prendaInfo.setNombre(pp.getPrenda().getNombre());
-    // prendaInfo.setPrecio(pp.getPrenda().getPrecio());
-    // ppDTO.setPrenda(prendaInfo);
-
-    // PedidoPrendaDTO.TallaInfo tallaInfo = new PedidoPrendaDTO.TallaInfo();
-    // tallaInfo.setId(pp.getTalla().getId());
-    // tallaInfo.setNombre(pp.getTalla().getNombre().name());
-    // ppDTO.setTalla(tallaInfo);
-
-    // ppDTO.setCantidad(pp.getCantidad());
-    // return ppDTO;
-    // }).toList();
-
-    // dto.setPrendas(prendasDTO);
-    // return dto;
-    // }
-
     public PedidoDTO toPedidoDTO(Pedido pedido) {
         PedidoDTO dto = new PedidoDTO();
         dto.setId(pedido.getId());

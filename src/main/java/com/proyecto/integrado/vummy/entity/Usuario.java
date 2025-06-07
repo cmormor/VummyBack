@@ -1,5 +1,7 @@
 package com.proyecto.integrado.vummy.entity;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +28,9 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     private Rol rol;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Pedido> pedidos;
 
     private Double altura;
     private Double cuelloManga;
