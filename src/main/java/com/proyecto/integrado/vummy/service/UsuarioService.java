@@ -31,9 +31,18 @@ public class UsuarioService {
     }
 
     public UsuarioDTO convertirAUsuarioDTO(Usuario usuario) {
-        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol(),
-                usuario.getAltura(), usuario.getCuelloManga(), usuario.getPecho(),
-                usuario.getCintura(), usuario.getCadera(), usuario.getEntrepierna(), null);
+        return new UsuarioDTO(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getRol(),
+                usuario.getAltura(),
+                usuario.getCuelloManga(),
+                usuario.getPecho(),
+                usuario.getCintura(),
+                usuario.getCadera(),
+                usuario.getEntrepierna(),
+                null);
     }
 
     public List<UsuarioDTO> obtenerTodos() {
@@ -71,19 +80,27 @@ public class UsuarioService {
     public UsuarioDTO registrarUsuario(Usuario usuario) {
         validarUsuario(usuario);
 
+        Rol rolRecibido = usuario.getRol();
+        if (rolRecibido == null) {
+            usuario.setRol(Rol.REGISTRADO);
+        } else {
+            if (rolRecibido == Rol.ADMINISTRADOR || rolRecibido == Rol.REGISTRADO) {
+                usuario.setRol(rolRecibido);
+            } else {
+                ErrorValidacionDTO errores = new ErrorValidacionDTO();
+                errores.agregarError("rol", "El rol debe ser ADMINISTRADOR o REGISTRADO.");
+                throw new ValidacionException(errores);
+            }
+        }
+
         String contraseñaEncriptada = passwordEncoder.encode(usuario.getPassword());
         usuario.setPassword(contraseñaEncriptada);
 
         validarMedidas(usuario);
 
-        usuario.setRol(Rol.REGISTRADO);
-
         Usuario nuevoUsuario = usuarioRepository.save(usuario);
 
-        String token = jwtService.generateToken(nuevoUsuario.getEmail());
-
         UsuarioDTO usuarioDTO = convertirAUsuarioDTO(nuevoUsuario);
-        usuarioDTO.setToken(token);
 
         return usuarioDTO;
     }
@@ -115,9 +132,9 @@ public class UsuarioService {
         return usuarioRepository.findById(usuarioId)
                 .map(usuario -> {
                     usuario.setRol(nuevoRol);
-                    return usuarioRepository.save(usuario);
-                })
-                .map(this::convertirAUsuarioDTO);
+                    Usuario usuarioGuardado = usuarioRepository.save(usuario);
+                    return convertirAUsuarioDTO(usuarioGuardado);
+                });
     }
 
     public Optional<UsuarioDTO> actualizarUsuario(Long id, Usuario usuarioActualizado) {
@@ -138,7 +155,19 @@ public class UsuarioService {
                     usuario.setCadera(usuarioActualizado.getCadera());
                     usuario.setEntrepierna(usuarioActualizado.getEntrepierna());
 
+                    Rol rolRecibido = usuarioActualizado.getRol();
+                    if (rolRecibido != null) {
+                        if (rolRecibido == Rol.ADMINISTRADOR || rolRecibido == Rol.REGISTRADO) {
+                            usuario.setRol(rolRecibido);
+                        } else {
+                            ErrorValidacionDTO errores = new ErrorValidacionDTO();
+                            errores.agregarError("rol", "El rol debe ser ADMINISTRADOR o REGISTRADO.");
+                            throw new ValidacionException(errores);
+                        }
+                    }
+
                     validarMedidas(usuario);
+
                     Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
                     String token = jwtService.generateToken(usuarioGuardado.getEmail());
