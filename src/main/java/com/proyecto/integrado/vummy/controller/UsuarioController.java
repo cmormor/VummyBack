@@ -160,10 +160,26 @@ public class UsuarioController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
-    if (usuarioService.eliminarUsuario(id)) {
-      return ResponseEntity.noContent().build();
+  public ResponseEntity<?> eliminarUsuario(
+      @PathVariable Long id,
+      @RequestHeader("Authorization") String authHeader) {
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      return ResponseEntity.status(401).body("No autorizado: token faltante o inválido");
     }
-    return ResponseEntity.notFound().build();
+
+    String token = authHeader.substring(7);
+    String emailUsuarioActual = jwtService.extractEmail(token);
+
+    try {
+      boolean eliminado = usuarioService.eliminarUsuario(id, emailUsuarioActual);
+      if (eliminado) {
+        return ResponseEntity.noContent().build();
+      } else {
+        return ResponseEntity.status(404).body("No se pudo eliminar el usuario: no encontrado");
+      }
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(403).body(e.getMessage());
+    }
   }
 }

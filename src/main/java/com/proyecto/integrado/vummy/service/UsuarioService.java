@@ -182,7 +182,14 @@ public class UsuarioService {
     }
 
     @Transactional
-    public boolean eliminarUsuario(Long id) {
+    public boolean eliminarUsuario(Long id, String emailUsuarioActual) {
+        Usuario usuarioActual = usuarioRepository.findByEmail(emailUsuarioActual)
+                .orElseThrow(() -> new IllegalStateException("Usuario autenticado no encontrado"));
+
+        if (usuarioActual.getId().equals(id)) {
+            throw new IllegalStateException("No puedes eliminar tu propia cuenta mientras estás logueado");
+        }
+
         return usuarioRepository.findById(id).map(usuario -> {
             usuarioRepository.delete(usuario);
             return true;
