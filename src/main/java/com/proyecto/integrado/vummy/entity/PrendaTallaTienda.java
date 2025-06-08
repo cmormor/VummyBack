@@ -16,15 +16,15 @@ public class PrendaTallaTienda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prenda_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ptt_prenda", foreignKeyDefinition = "FOREIGN KEY (prenda_id) REFERENCES prendas(id) ON DELETE CASCADE"))
     private Prenda prenda;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tienda_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ptt_tienda", foreignKeyDefinition = "FOREIGN KEY (tienda_id) REFERENCES tiendas(id) ON DELETE CASCADE"))
     private Tienda tienda;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "talla_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ptt_talla", foreignKeyDefinition = "FOREIGN KEY (talla_id) REFERENCES tallas(id) ON DELETE CASCADE"))
     private Talla talla;
 

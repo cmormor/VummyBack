@@ -1,9 +1,10 @@
 package com.proyecto.integrado.vummy.controller;
 
+import com.proyecto.integrado.vummy.dto.PrendaTallaTiendaCreateDTO;
 import com.proyecto.integrado.vummy.dto.PrendaTallaTiendaDTO;
-import com.proyecto.integrado.vummy.entity.PrendaTallaTienda;
 import com.proyecto.integrado.vummy.service.PrendaTallaTiendaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,19 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PrendaTallaTiendaController {
 
-    private final PrendaTallaTiendaService prendaTallaTiendaService;
+    private final PrendaTallaTiendaService service;
 
-    @PostMapping("/{prendaId}")
+    @PostMapping(path = "/{prendaId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> asociarTallas(
             @PathVariable Long prendaId,
-            @RequestBody PrendaTallaTienda talla) {
-        prendaTallaTiendaService.asociarTallas(prendaId, List.of(talla));
-        return ResponseEntity.ok("Talla asociada correctamente a la prenda.");
+            @RequestBody List<PrendaTallaTiendaCreateDTO> tallasDto) {
+        service.asociarTallas(prendaId, tallasDto);
+        return ResponseEntity.ok("Tallas asociadas correctamente.");
     }
 
-    @GetMapping("/{prendaId}")
-    public ResponseEntity<List<PrendaTallaTiendaDTO>> obtenerTallasDisponibles(
+    @GetMapping(path = "/{prendaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PrendaTallaTiendaDTO>> obtenerTallas(
             @PathVariable Long prendaId) {
-        return ResponseEntity.ok(prendaTallaTiendaService.obtenerTallasDisponibles(prendaId));
+        return ResponseEntity.ok(service.obtenerTallasDisponibles(prendaId));
     }
 }

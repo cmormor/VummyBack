@@ -38,27 +38,26 @@ public class TallaController {
     }
 
     @PostMapping
-public ResponseEntity<TallaDTO> agregarTalla(@RequestBody TallaDTO tallaDTO) {
-    Talla talla = new Talla();
-    talla.setNombre(TallaNombre.valueOf(tallaDTO.getNombre()));
-    talla.setAltura(tallaDTO.getAltura());
-    talla.setCuelloManga(tallaDTO.getCuelloManga());
-    talla.setPecho(tallaDTO.getPecho());
-    talla.setCintura(tallaDTO.getCintura());
-    talla.setCadera(tallaDTO.getCadera());
-    talla.setEntrepierna(tallaDTO.getEntrepierna());
-    if (tallaDTO.getTienda() != null) {
-        Tienda tienda = new Tienda();
-        tienda.setId(tallaDTO.getTienda().getId());
-        talla.setTienda(tienda);
+    public ResponseEntity<TallaDTO> agregarTalla(@RequestBody TallaDTO tallaDTO) {
+        Talla talla = new Talla();
+        talla.setNombre(TallaNombre.valueOf(tallaDTO.getNombre()));
+        talla.setAltura(tallaDTO.getAltura());
+        talla.setCuelloManga(tallaDTO.getCuelloManga());
+        talla.setPecho(tallaDTO.getPecho());
+        talla.setCintura(tallaDTO.getCintura());
+        talla.setCadera(tallaDTO.getCadera());
+        talla.setEntrepierna(tallaDTO.getEntrepierna());
+        if (tallaDTO.getTienda() != null) {
+            Tienda tienda = new Tienda();
+            tienda.setId(tallaDTO.getTienda().getId());
+            talla.setTienda(tienda);
+        }
+
+        Talla tallaGuardada = tallaService.agregarTalla(talla);
+
+        TallaDTO tallaGuardadaDTO = new TallaDTO(tallaGuardada);
+        return ResponseEntity.ok(tallaGuardadaDTO);
     }
-
-    Talla tallaGuardada = tallaService.agregarTalla(talla);
-
-    TallaDTO tallaGuardadaDTO = new TallaDTO(tallaGuardada);
-    return ResponseEntity.ok(tallaGuardadaDTO);
-}
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Talla> actualizarTalla(@PathVariable Long id, @RequestBody Talla talla) {
