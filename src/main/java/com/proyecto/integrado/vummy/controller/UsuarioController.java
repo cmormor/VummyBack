@@ -1,8 +1,6 @@
 package com.proyecto.integrado.vummy.controller;
 
-import com.proyecto.integrado.vummy.dto.LoginRequestDTO;
-import com.proyecto.integrado.vummy.dto.ResetearContrasena;
-import com.proyecto.integrado.vummy.dto.UsuarioDTO;
+import com.proyecto.integrado.vummy.dto.*;
 import com.proyecto.integrado.vummy.entity.Rol;
 import com.proyecto.integrado.vummy.entity.Usuario;
 import com.proyecto.integrado.vummy.security.jwt.JwtService;
@@ -14,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +60,7 @@ public class UsuarioController {
     }
     String token = authHeader.substring(7);
     String email = jwtService.extractEmail(token);
+
     return usuarioService.obtenerPorEmail(email)
         .map(map -> {
           UsuarioDTO usuarioDTO = new UsuarioDTO(
@@ -81,7 +81,8 @@ public class UsuarioController {
   }
 
   @PostMapping("/auth/register")
-  public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
+  public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody RegisterRequestDTO registerRequest) {
+    Usuario usuario = mapRegisterRequestToUsuario(registerRequest);
     UsuarioDTO usuarioDTO = usuarioService.registrarUsuario(usuario);
     return ResponseEntity.ok(usuarioDTO);
   }
@@ -89,20 +90,18 @@ public class UsuarioController {
   @PostMapping("/auth/login")
   public ResponseEntity<UsuarioDTO> iniciarSesion(@RequestBody LoginRequestDTO loginRequest) {
     return usuarioService.iniciarSesion(loginRequest.getEmail(), loginRequest.getPassword())
-        .map(usuario -> ResponseEntity.ok(usuario))
+        .map(ResponseEntity::ok)
         .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
   }
 
   @PostMapping("/auth/logout")
   public ResponseEntity<String> logout(HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");
-
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       String token = authHeader.substring(7);
       long expirationTime = jwtService.extractExpiration(token).getTime();
       tokenBlacklistService.addTokenToBlacklist(token, expirationTime);
     }
-
     return ResponseEntity.ok("Sesión cerrada exitosamente");
   }
 
@@ -121,24 +120,29 @@ public class UsuarioController {
 
   @PutMapping("/profile")
   public ResponseEntity<UsuarioDTO> actualizarMiPerfil(HttpServletRequest request,
-      @RequestBody Usuario usuarioActualizado) {
+      @RequestBody UpdatePerfilDTO perfilActualizadoDTO) {
     String authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       return ResponseEntity.status(401).build();
     }
-
     String token = authHeader.substring(7);
     String email = jwtService.extractEmail(token);
 
     return usuarioService.obtenerUsuarioPorEmailByRepository(email)
-        .flatMap(usuarioExistente -> usuarioService.actualizarUsuario(usuarioExistente.getId(), usuarioActualizado))
+        .flatMap(usuarioExistente -> {
+          // Actualizamos solo los campos de perfil
+          actualizarCamposPerfil(usuarioExistente, perfilActualizadoDTO);
+          return usuarioService.actualizarUsuario(usuarioExistente.getId(), usuarioExistente);
+        })
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioActualizado) {
+  public ResponseEntity<?> actualizarUsuario(@PathVariable Long id,
+      @RequestBody UpdateUsuarioDTO usuarioActualizadoDTO) {
     try {
+      Usuario usuarioActualizado = mapUpdateUsuarioDTOToUsuario(usuarioActualizadoDTO);
       return usuarioService.actualizarUsuario(id, usuarioActualizado)
           .map(ResponseEntity::ok)
           .orElse(ResponseEntity.notFound().build());
@@ -167,7 +171,6 @@ public class UsuarioController {
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       return ResponseEntity.status(401).body("No autorizado: token faltante o inválido");
     }
-
     String token = authHeader.substring(7);
     String emailUsuarioActual = jwtService.extractEmail(token);
 
@@ -182,4 +185,51 @@ public class UsuarioController {
       return ResponseEntity.status(403).body(e.getMessage());
     }
   }
+
+  private Usuario mapRegisterRequestToUsuario(RegisterRequestDTO dto) {
+    Usuario u = new Usuario();
+    u.setEmail(dto.getEmail());
+    u.setPassword(dto.getPassword());
+    u.setNombre(dto.getNombre());
+    u.setRol(dto.getRol());
+    u.setAltura(dto.getAltura());
+    u.setCuelloManga(dto.getCuelloManga());
+    u.setPecho(dto.getPecho());
+    u.setCintura(dto.getCintura());
+    u.setCadera(dto.getCadera());
+    u.setEntrepierna(dto.getEntrepierna());
+    return u;
+  }
+
+  private void actualizarCamposPerfil(Usuario usuario, UpdatePerfilDTO dto) {
+    if (dto.getNombre() != null)
+      usuario.setNombre(dto.getNombre());
+    if (dto.getAltura() != null)
+      usuario.setAltura(dto.getAltura());
+    if (dto.getCuelloManga() != null)
+      usuario.setCuelloManga(dto.getCuelloManga());
+    if (dto.getPecho() != null)
+      usuario.setPecho(dto.getPecho());
+    if (dto.getCintura() != null)
+      usuario.setCintura(dto.getCintura());
+    if (dto.getCadera() != null)
+      usuario.setCadera(dto.getCadera());
+    if (dto.getEntrepierna() != null)
+      usuario.setEntrepierna(dto.getEntrepierna());
+  }
+
+  private Usuario mapUpdateUsuarioDTOToUsuario(UpdateUsuarioDTO dto) {
+    Usuario u = new Usuario();
+    u.setNombre(dto.getNombre());
+    u.setEmail(dto.getEmail());
+    u.setRol(dto.getRol());
+    u.setAltura(dto.getAltura());
+    u.setCuelloManga(dto.getCuelloManga());
+    u.setPecho(dto.getPecho());
+    u.setCintura(dto.getCintura());
+    u.setCadera(dto.getCadera());
+    u.setEntrepierna(dto.getEntrepierna());
+    return u;
+  }
+
 }
