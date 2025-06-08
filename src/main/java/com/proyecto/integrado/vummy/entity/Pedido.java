@@ -29,6 +29,9 @@ public class Pedido {
 
     private Double total;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoPrenda> prendas;
+
+    @Version
+    private Long version;
 }

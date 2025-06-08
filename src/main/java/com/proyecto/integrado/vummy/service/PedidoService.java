@@ -8,6 +8,9 @@ import com.proyecto.integrado.vummy.repository.PrendaRepository;
 import com.proyecto.integrado.vummy.dto.PedidoDTO;
 import com.proyecto.integrado.vummy.dto.PedidoPrendaDTO;
 import com.proyecto.integrado.vummy.repository.TallaRepository;
+
+import jakarta.transaction.Transactional;
+
 import com.proyecto.integrado.vummy.repository.PrendaTallaTiendaRepository;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -83,6 +86,7 @@ public class PedidoService {
         return Optional.empty();
     }
 
+    @Transactional
     public boolean eliminarPedido(Long id) {
         if (pedidoRepository.existsById(id)) {
             pedidoRepository.deleteById(id);
