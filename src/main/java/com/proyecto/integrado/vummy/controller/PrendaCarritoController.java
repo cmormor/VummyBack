@@ -1,8 +1,12 @@
 package com.proyecto.integrado.vummy.controller;
 
 import com.proyecto.integrado.vummy.dto.ItemCarritoDTO;
+import com.proyecto.integrado.vummy.entity.Prenda;
 import com.proyecto.integrado.vummy.entity.PrendaCarrito;
+import com.proyecto.integrado.vummy.entity.Talla;
 import com.proyecto.integrado.vummy.entity.Usuario;
+import com.proyecto.integrado.vummy.repository.PrendaRepository;
+import com.proyecto.integrado.vummy.repository.TallaRepository;
 import com.proyecto.integrado.vummy.repository.UsuarioRepository;
 import com.proyecto.integrado.vummy.security.jwt.JwtService;
 import com.proyecto.integrado.vummy.service.PrendaCarritoService;
@@ -15,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -30,9 +33,15 @@ public class PrendaCarritoController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @PostMapping
+    @Autowired
+    private PrendaRepository prendaRepository;
+
+    @Autowired
+    private TallaRepository tallaRepository;
+
+    @PostMapping(consumes = "application/json")
     public ResponseEntity<?> agregarAlCarrito(@RequestBody ItemCarritoDTO dto,
-                                              @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Token no válido");
         }
@@ -50,117 +59,129 @@ public class PrendaCarritoController {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
+        Prenda prendaEntity = prendaRepository.findById(dto.getPrenda())
+                .orElseThrow(() -> new RuntimeException("Prenda no encontrada"));
+
+        Talla tallaEntity = tallaRepository.findById(dto.getTalla())
+                .orElseThrow(() -> new RuntimeException("Talla no encontrada"));
+
         PrendaCarrito prendaCarrito = new PrendaCarrito();
         prendaCarrito.setCorreo(correo);
-        prendaCarrito.setPrenda(dto.getPrenda());
-        prendaCarrito.setTalla(dto.getTalla());
+        prendaCarrito.setPrenda(prendaEntity);
+        prendaCarrito.setTalla(tallaEntity);
         prendaCarrito.setCantidad(dto.getCantidad());
 
         servicio.guardarPedidoCarrito(prendaCarrito);
         return ResponseEntity.ok().build();
     }
 
-  @GetMapping
-  public ResponseEntity<?> obtenerCarrito(@RequestHeader("Authorization") String authHeader) {
-      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-          return ResponseEntity.status(401).body("Token no válido");
-      }
+    @GetMapping
+    public ResponseEntity<?> obtenerCarrito(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Token no válido");
+        }
 
-      String token = authHeader.substring(7);
-      String correo;
-      try {
-          correo = jwtService.extractEmail(token);
-      } catch (Exception e) {
-          return ResponseEntity.status(401).body("Token inválido o expirado");
-      }
+        String token = authHeader.substring(7);
+        String correo;
+        try {
+            correo = jwtService.extractEmail(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token inválido o expirado");
+        }
 
-      Usuario usuario = usuarioRepository.findByEmail(correo).orElse(null);
-      if (usuario == null) {
-          return ResponseEntity.status(404).body("Usuario no encontrado");
-      }
+        Usuario usuario = usuarioRepository.findByEmail(correo).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
 
-      List<Object> carritoFiltrado = servicio.obtenerPorCorreo(correo).stream().map(item -> {
-          return new java.util.LinkedHashMap<String, Object>() {{
-              put("id", item.getId());
-              put("correo", item.getCorreo());
-              
-              put("prenda", new java.util.LinkedHashMap<String, Object>() {{
-                put("id", item.getPrenda().getId());
-                put("nombre", item.getPrenda().getNombre());
-                put("precio", item.getPrenda().getPrecio());
-              }});
-              
-              put("talla", new java.util.LinkedHashMap<String, Object>() {{
-                put("id", item.getTalla().getId());
-                put("nombre", item.getTalla().getNombre().name());
-              }});
+        List<Object> carritoFiltrado = servicio.obtenerPorCorreo(correo).stream().map(item -> {
+            return new java.util.LinkedHashMap<String, Object>() {
+                {
+                    put("id", item.getId());
+                    put("correo", item.getCorreo());
 
-              put("cantidad", item.getCantidad());
-            }};
-      }).collect(Collectors.toList());
+                    put("prenda", new java.util.LinkedHashMap<String, Object>() {
+                        {
+                            put("id", item.getPrenda().getId());
+                            put("nombre", item.getPrenda().getNombre());
+                            put("precio", item.getPrenda().getPrecio());
+                        }
+                    });
 
-      return ResponseEntity.ok(carritoFiltrado);
-  }
+                    put("talla", new java.util.LinkedHashMap<String, Object>() {
+                        {
+                            put("id", item.getTalla().getId());
+                            put("nombre", item.getTalla().getNombre().name());
+                        }
+                    });
 
-  @PutMapping("/{id}")
-  public ResponseEntity<?> actualizarCantidad(@PathVariable Long id,
-                                              @RequestBody ItemCarritoDTO dto,
-                                              @RequestHeader("Authorization") String authHeader) {
-      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-          return ResponseEntity.status(401).body("Token no válido");
-      }
+                    put("cantidad", item.getCantidad());
+                }
+            };
+        }).collect(Collectors.toList());
 
-      String token = authHeader.substring(7);
-      String correo;
-      try {
-          correo = jwtService.extractEmail(token);
-      } catch (Exception e) {
-          return ResponseEntity.status(401).body("Token inválido o expirado");
-      }
+        return ResponseEntity.ok(carritoFiltrado);
+    }
 
-      PrendaCarrito prendaCarrito = servicio.obtenerPorId(id);
-      if (prendaCarrito == null || !prendaCarrito.getCorreo().equals(correo)) {
-          return ResponseEntity.status(404).body("Elemento no encontrado o no pertenece al usuario");
-      }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarCantidad(@PathVariable Long id,
+            @RequestBody ItemCarritoDTO dto,
+            @RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Token no válido");
+        }
 
-      prendaCarrito.setCantidad(dto.getCantidad());
-      servicio.guardarPedidoCarrito(prendaCarrito);
+        String token = authHeader.substring(7);
+        String correo;
+        try {
+            correo = jwtService.extractEmail(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token inválido o expirado");
+        }
 
-      return ResponseEntity.ok().build();
-  }
+        PrendaCarrito prendaCarrito = servicio.obtenerPorId(id);
+        if (prendaCarrito == null || !prendaCarrito.getCorreo().equals(correo)) {
+            return ResponseEntity.status(404).body("Elemento no encontrado o no pertenece al usuario");
+        }
 
-  @Transactional
-  @DeleteMapping
-  public ResponseEntity<?> eliminarTodoElCarrito(@RequestHeader("Authorization") String authHeader) {
-      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-          return ResponseEntity.status(401).body("Token no válido");
-      }
+        prendaCarrito.setCantidad(dto.getCantidad());
+        servicio.guardarPedidoCarrito(prendaCarrito);
 
-      String token = authHeader.substring(7);
-      String correo;
-      try {
-          correo = jwtService.extractEmail(token);
-      } catch (Exception e) {
-          return ResponseEntity.status(401).body("Token inválido o expirado");
-      }
+        return ResponseEntity.ok().build();
+    }
 
-      Usuario usuario = usuarioRepository.findByEmail(correo).orElse(null);
-      if (usuario == null) {
-          return ResponseEntity.status(404).body("Usuario no encontrado");
-      }
+    @Transactional
+    @DeleteMapping
+    public ResponseEntity<?> eliminarTodoElCarrito(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Token no válido");
+        }
 
-      servicio.vaciarCarritoPorCorreo(correo);
-      return ResponseEntity.ok("Carrito eliminado correctamente");
-  }
+        String token = authHeader.substring(7);
+        String correo;
+        try {
+            correo = jwtService.extractEmail(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token inválido o expirado");
+        }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
-      PrendaCarrito prenda = servicio.obtenerPorId(id);
-      if (prenda == null) {
-          return ResponseEntity.notFound().build();
-      }
+        Usuario usuario = usuarioRepository.findByEmail(correo).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
 
-      servicio.eliminarPorId(id);
-      return ResponseEntity.noContent().build();
-  }
+        servicio.vaciarCarritoPorCorreo(correo);
+        return ResponseEntity.ok("Carrito eliminado correctamente");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
+        PrendaCarrito prenda = servicio.obtenerPorId(id);
+        if (prenda == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        servicio.eliminarPorId(id);
+        return ResponseEntity.noContent().build();
+    }
 }
